@@ -10,23 +10,24 @@ describe('CreateSession', () => {
 			password: process.env.USER_PASSWORD
 		})
 
-		expect(response.status).toBe(200)
+		const message = JSON.parse(response.text)
+
+		expect(message).toHaveProperty('token')
 	})
 
-	it('should failt due to lack of password', async () => {
-
-		expect(request(app).post('/auth/login').send({
-			user: '',
+	it('should failt due to lack of user', async () => {
+		const response = await request(app).post('/auth/login').send({
 			password: process.env.USER_PASSWORD
-		})).rejects
+		})
+		expect(response.status).toBe(400)
 	})
 
-	it('should fail due to lack of user', async () => {
+	it('should fail due to lack of password', async () => {
 
-		expect(request(app).post('/auth/login').send({
-			user: process.env.USER_LOGIN,
-			password: ''
-		})).rejects
+		const response = await request(app).post('/auth/login').send({
+			user: process.env.USER_LOGIN
+		})
+		expect(response.status).toBe(400)
 	})
 
 	it('should fail due to invalid credentials', async () => {

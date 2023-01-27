@@ -7,21 +7,17 @@ import {prismaClient} from "@shared/database/client"
 import {app} from "@shared/http/app"
 import request from 'supertest'
 
+let token = ''
+
 describe('ShowAllClients', () => {
 
-	it('should fail due to lack of authorization', async () => {
-		const response = await request(app).get('/clients/all')
-		expect(response.status).toBe(401)
-	})
-
-
-	it('should show all the registered clients', async () => {
+	beforeAll(async () => {
 		const responseAuth = await request(app).post('/auth/login').send({
 			user: process.env.USER_LOGIN,
 			password: process.env.USER_PASSWORD
 		})
 
-		const token = JSON.parse(responseAuth.text).token
+		token = JSON.parse(responseAuth.text).token
 
 		await prismaClient.client.create({
 			data: {
@@ -36,7 +32,15 @@ describe('ShowAllClients', () => {
 			}
 		})
 
+	})
 
+	it('should fail due to lack of authorization', async () => {
+		const response = await request(app).get('/clients/all')
+		expect(response.status).toBe(401)
+	})
+
+
+	it('should show all the registered clients', async () => {
 		const response = await request(app).get('/clients/all').set('Authorization', `Bearer: ${token}`)
 
 		const clients = JSON.parse(response.text)

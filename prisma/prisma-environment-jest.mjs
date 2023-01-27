@@ -20,8 +20,7 @@ export default class CustomEnvironment extends NodeEnviroment {
 
 	constructor(config) {
 		super(config)
-		this.schema = `odonto-dashboard-${uuid()}`
-		this.connectionString = `${process.env.DATABASE_URL}${this.schema}`
+		this.connectionString = `${process.env.DATABASE_URL}odonto_dashboard_test`
 	}
 
 	setup() {
@@ -37,10 +36,10 @@ export default class CustomEnvironment extends NodeEnviroment {
 			host: 'localhost',
 			user: 'root',
 			password: 'tomaz1224',
-			database: this.schema
+			database: 'odonto_dashboard_test'
 		})
 
-		connection.query("DROP DATABASE `" + this.schema + "`", (err, result) => {
+		connection.query("DELETE FROM odonto_dashboard_test.clients", (err, result) => {
 			if (err) throw err
 
 		})

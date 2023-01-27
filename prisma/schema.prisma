@@ -46,7 +46,6 @@ model Appointment {
   clientId   String
 
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
-
-  @@unique([clientId])
+ 
   @@map("appointments")
 }
