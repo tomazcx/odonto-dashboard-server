@@ -6,9 +6,9 @@ export interface IClient {
 	name: string
 	age: number
 	phoneNumber: string
-	address: IAddress
-	budget?: string
-	budgetDescrpiton?: string
-	anamnese?: string
+	address: IAddress | null
+	budget?: string | null
+	budgetDescrpiton?: string | null
+	anamnese?: string | null
 	appointments?: IAppointment[]
 }

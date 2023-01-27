@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id               String  @id @default(uuid())
+  name             String
+  age              Int
+  phoneNumber      String
+  budget           String?
+  budgetDescrpiton String?
+  anamnese         String?
+
+  address      Address?
+  appointments Appointment[]
+
+  @@map("clients")
+}
+
+model Address {
+  id              String @id @default(uuid())
+  city            String
+  district        String?
+  streetAndNumber String?
+  clientId        String
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId])
+  @@map("addresses")
+}
+
+model Appointment {
+  id         String @id @default(uuid())
+  date       String
+  teeth      String
+  proccedure String
+  clientId   String
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId])
+  @@map("appointments")
+}

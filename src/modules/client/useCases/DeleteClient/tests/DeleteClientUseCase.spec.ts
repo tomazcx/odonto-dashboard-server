@@ -4,12 +4,11 @@ import {MockClientsRepository} from "@modules/client/domain/repositories/mocks/M
 import {AppError} from "@shared/errors/AppError";
 import {DeleteClientUseCase} from "..";
 import {CreateClientUseCase} from "../../CreateClient";
-import {ShowClientUseCase} from "../../ShowClient";
 
 let mockClientsRepository: IClientsRepository
 let deleteClientUseCase: DeleteClientUseCase
 let createClientUseCase: CreateClientUseCase
-let showClientUseCase: ShowClientUseCase
+
 
 describe('DeleteClient', () => {
 
@@ -17,7 +16,6 @@ describe('DeleteClient', () => {
 		mockClientsRepository = new MockClientsRepository()
 		deleteClientUseCase = new DeleteClientUseCase(mockClientsRepository)
 		createClientUseCase = new CreateClientUseCase(mockClientsRepository)
-		showClientUseCase = new ShowClientUseCase(mockClientsRepository)
 	})
 
 	it('should delete the client with the informed id', async () => {
@@ -37,10 +35,16 @@ describe('DeleteClient', () => {
 
 		const idClient = registeredClient.id
 
-		await deleteClientUseCase.execute({id: idClient})
+		expect(
+			deleteClientUseCase.execute({id: idClient})
+		).toBeTruthy()
+	})
+
+	it('should fail by informing a wrong id', async () => {
+		const wrongId = 'wrong-id'
 
 		await expect(
-			showClientUseCase.execute({id: idClient})
+			deleteClientUseCase.execute({id: wrongId})
 		).rejects.toBeInstanceOf(AppError)
 
 	})

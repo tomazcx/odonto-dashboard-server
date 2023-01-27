@@ -13,7 +13,7 @@ export class ShowClientUseCase {
 		const client = await this.clienstRepository.findById(id)
 
 		if (!client) {
-			throw new AppError("Cliente não encontrado", 404)
+			throw new AppError("Paciente não encontrado", 404)
 		}
 
 		return client as IClient

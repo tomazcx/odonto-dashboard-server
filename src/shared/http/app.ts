@@ -4,6 +4,8 @@ import 'express-async-errors'
 import {AppError} from "@shared/errors/AppError"
 import cors from 'cors'
 import {router} from "./routes"
+import "@config/dotenv"
+import '../container'
 const app = express()
 
 app.use(express.json())

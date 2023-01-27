@@ -8,13 +8,15 @@ export class DeleteClientUseCase {
 
 	constructor(@inject('ClientsRepository') private clientsRepository: IClientsRepository) {}
 
-	public async execute({id}: DeleteClientDTO): Promise<void> {
-		const client = await this.clientsRepository.findById(id)
+	public async execute({id}: DeleteClientDTO): Promise<boolean> {
+		const client = await this.clientsRepository.exists(id)
 
 		if (!client) {
-			throw new AppError("Id do cliente não encotrado", 404)
+			throw new AppError("Id do paciente não encotrado", 404)
 		}
 
-		await this.clientsRepository.delete(id)
+		const deleted = await this.clientsRepository.delete({id})
+
+		return deleted
 	}
 }

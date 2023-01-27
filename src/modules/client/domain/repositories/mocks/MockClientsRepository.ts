@@ -3,10 +3,16 @@ import {UpdateClientDTO} from "@modules/client/useCases/UpdateClient/domain/Upda
 import {IClient} from "../../models/IClient";
 import {v4 as uuid} from 'uuid'
 import {IClientsRepository} from "../IClientsRepository";
+import {DeleteClientDTO} from "@modules/client/useCases/DeleteClient/domain/DeleteClientDTO";
 
 export class MockClientsRepository implements IClientsRepository {
 
 	private clients: IClient[] = []
+
+	public async exists(id: string): Promise<boolean> {
+		const client = this.clients.find(client => client.id === id)
+		return !!client
+	}
 
 	public async findAll(): Promise<IClient[]> {
 		return this.clients
@@ -52,7 +58,8 @@ export class MockClientsRepository implements IClientsRepository {
 
 	}
 
-	public async delete(id: string): Promise<void> {
+	public async delete({id}: DeleteClientDTO): Promise<boolean> {
 		this.clients = this.clients.filter(client => client.id !== id)
+		return true
 	}
 }

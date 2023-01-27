@@ -11,10 +11,10 @@ export class UpdateClientUseCase {
 	constructor(@inject('ClientsRepository') private clientsRepository: IClientsRepository) {}
 
 	public async execute({id, clientData}: UpdateClientDTO): Promise<IClient> {
-		const verifyId = await this.clientsRepository.findById(id)
+		const clientExists = await this.clientsRepository.exists(id)
 
-		if (!verifyId) {
-			throw new AppError("Id do cliente não encontrado", 404)
+		if (!clientExists) {
+			throw new AppError("Id do paciente não encontrado", 404)
 		}
 
 		const updatedClient = await this.clientsRepository.update({id, clientData})
