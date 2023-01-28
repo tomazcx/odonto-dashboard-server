@@ -16,7 +16,7 @@ model Client {
   age              Int
   phoneNumber      String
   budget           String?
-  budgetDescrpiton String?
+  budgetDescription String?
   anamnese         String?
 
   address      Address?

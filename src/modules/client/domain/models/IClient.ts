@@ -8,7 +8,7 @@ export interface IClient {
 	phoneNumber: string
 	address: IAddress | null
 	budget?: string | null
-	budgetDescrpiton?: string | null
+	budgetDescription?: string | null
 	anamnese?: string | null
 	appointments?: IAppointment[]
 }

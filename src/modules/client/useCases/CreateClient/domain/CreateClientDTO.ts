@@ -6,6 +6,6 @@ export interface CreateClientDTO {
 	streetAndNumber?: string
 	district?: string
 	budget?: string
-	budgetDescrpiton?: string
+	budgetDescription?: string
 	anamnese?: string
 }

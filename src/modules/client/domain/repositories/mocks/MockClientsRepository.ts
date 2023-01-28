@@ -23,7 +23,7 @@ export class MockClientsRepository implements IClientsRepository {
 		return client
 	}
 
-	public async create({name, phoneNumber, age, city, anamnese, budget, budgetDescrpiton, district, streetAndNumber}: CreateClientDTO): Promise<IClient> {
+	public async create({name, phoneNumber, age, city, anamnese, budget, budgetDescription, district, streetAndNumber}: CreateClientDTO): Promise<IClient> {
 		const id = uuid()
 		const addressId = uuid()
 
@@ -40,7 +40,7 @@ export class MockClientsRepository implements IClientsRepository {
 				clientId: id
 			},
 			budget,
-			budgetDescrpiton,
+			budgetDescription,
 			anamnese
 		}
 

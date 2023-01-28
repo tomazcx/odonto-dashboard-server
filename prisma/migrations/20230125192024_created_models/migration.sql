@@ -31,7 +31,6 @@ CREATE TABLE `appointments` (
     `proccedure` VARCHAR(191) NOT NULL,
     `clientId` VARCHAR(191) NOT NULL,
 
-    UNIQUE INDEX `appointments_clientId_key`(`clientId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

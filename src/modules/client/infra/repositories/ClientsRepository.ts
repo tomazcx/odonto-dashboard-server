@@ -49,7 +49,7 @@ export class ClientsRepository implements IClientsRepository {
 					}
 				},
 				budget: data.budget,
-				budgetDescrpiton: data.budgetDescrpiton,
+				budgetDescription: data.budgetDescription,
 				anamnese: data.anamnese
 			},
 			include: {
@@ -78,7 +78,7 @@ export class ClientsRepository implements IClientsRepository {
 					}
 				},
 				budget: clientData.budget,
-				budgetDescrpiton: clientData.budgetDescrpiton,
+				budgetDescription: clientData.budgetDescription,
 				anamnese: clientData.anamnese
 			},
 			include: {

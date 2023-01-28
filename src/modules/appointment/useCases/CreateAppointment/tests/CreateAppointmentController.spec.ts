@@ -12,7 +12,7 @@ let token = ''
 let clientId = ''
 describe('CreateAppointment', () => {
 
-	//Get auth token
+	//Get auth token and register client 
 	beforeAll(async () => {
 		const response = await request(app).post('/auth/login').send({
 			user: process.env.USER_LOGIN,
