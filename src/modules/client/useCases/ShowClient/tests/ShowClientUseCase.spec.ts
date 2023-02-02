@@ -1,60 +1,55 @@
 import 'reflect-metadata'
-import {IClientsRepository} from "@modules/client/domain/repositories/IClientsRepository";
-import {MockClientsRepository} from "@modules/client/domain/repositories/mocks/MockClientsRepository";
 import {ShowClientUseCase} from "..";
-import {CreateClientUseCase} from "../../CreateClient";
 import {AppError} from '@shared/errors/AppError';
-
-let mockClientsRepository: IClientsRepository
-let showClientUseCase: ShowClientUseCase
-let createClientUseCase: CreateClientUseCase
+import {v4 as uuid} from 'uuid'
 
 describe('ShowClient', () => {
 
-	beforeAll(() => {
-		mockClientsRepository = new MockClientsRepository()
-		showClientUseCase = new ShowClientUseCase(mockClientsRepository)
-		createClientUseCase = new CreateClientUseCase(mockClientsRepository)
-	})
 
 	it('should show the client data', async () => {
-		const client = {
-			name: "tomaz xavier",
+		const clientId = uuid()
+		const expectedOutputClient = {
+			id: clientId,
+			name: 'test-name',
 			age: 18,
-			phoneNumber: "49998123812",
-			city: 'Florianópolis',
-			streetAndNumber: 'Rua da alvorada, 134',
-			district: 'Centro'
+			phoneNumber: 'test-number',
+			address: {
+				id: uuid(),
+				city: 'test-city',
+				streetAndNumber: 'test-address',
+				district: 'test-district',
+				clientId
+			}
 		}
 
-		const registeredClient = await createClientUseCase.execute(client)
+		const mockClientRepository = {
+			findById: jest.fn().mockReturnValue(Promise.resolve(expectedOutputClient))
+		}
 
-		const id = registeredClient.id
+		//@ts-expect-error defined part of the methods
+		const showClientUseCase = new ShowClientUseCase(mockClientRepository)
 
-		const clientFound = await showClientUseCase.execute({id})
+		const client = await showClientUseCase.execute({id: clientId})
 
-		expect(clientFound).toEqual(registeredClient)
+		expect(mockClientRepository.findById).toBeCalled()
+		expect(client).toStrictEqual(expectedOutputClient)
 
 	})
 
-	it('it should fail when informed a wrong id', async () => {
-		const client = {
-			name: "tomaz xavier",
-			age: 18,
-			phoneNumber: "49998123812",
-			city: 'Florianópolis',
-			streetAndNumber: 'Rua da alvorada, 134',
-			district: 'Centro'
+	it('should fail by informing a wrong id', async () => {
+		const mockClientRepository = {
+			findById: jest.fn().mockReturnValue(Promise.resolve(undefined))
 		}
 
-		await createClientUseCase.execute(client)
+		//@ts-expect-error defined part of the methods
+		const showClientUseCase = new ShowClientUseCase(mockClientRepository)
 
-		const id = 'wrong-id'
+		const wrongId = 'wrong-id'
 
 		await expect(
-			showClientUseCase.execute({id})
+			showClientUseCase.execute({id: wrongId})
 		).rejects.toBeInstanceOf(AppError)
-
+		expect(mockClientRepository.findById).toBeCalled()
 
 	})
 })

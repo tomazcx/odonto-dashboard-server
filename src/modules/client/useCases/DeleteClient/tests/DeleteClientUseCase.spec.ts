@@ -1,51 +1,44 @@
 import 'reflect-metadata'
-import {IClientsRepository} from "@modules/client/domain/repositories/IClientsRepository";
-import {MockClientsRepository} from "@modules/client/domain/repositories/mocks/MockClientsRepository";
 import {AppError} from "@shared/errors/AppError";
 import {DeleteClientUseCase} from "..";
-import {CreateClientUseCase} from "../../CreateClient";
+import {v4 as uuid} from 'uuid'
 
-let mockClientsRepository: IClientsRepository
-let deleteClientUseCase: DeleteClientUseCase
-let createClientUseCase: CreateClientUseCase
-
-
-describe('DeleteClient', () => {
-
-	beforeAll(() => {
-		mockClientsRepository = new MockClientsRepository()
-		deleteClientUseCase = new DeleteClientUseCase(mockClientsRepository)
-		createClientUseCase = new CreateClientUseCase(mockClientsRepository)
-	})
+describe("delete client", () => {
 
 	it('should delete the client with the informed id', async () => {
-		const client = {
-			name: "tomaz xavier",
-			age: 18,
-			phoneNumber: "49998123812",
-			city: 'Florianópolis',
-			streetAndNumber: 'Rua da alvorada, 134',
-			district: 'Centro',
-			budget: 'R$139,00',
-			budgetDescription: 'limpeza dental',
-			anamnese: 'Doença cardiovascular'
+
+		const clientId = uuid()
+
+		const mockClientRepository = {
+			exists: jest.fn().mockReturnValue(Promise.resolve(true)),
+			delete: jest.fn().mockReturnValue(Promise.resolve(true))
 		}
 
-		const registeredClient = await createClientUseCase.execute(client)
+		//@ts-expect-error defined part of the methods
+		const deleteClientUseCase = new DeleteClientUseCase(mockClientRepository)
 
-		const idClient = registeredClient.id
+		const deleteResult = await deleteClientUseCase.execute({id: clientId})
 
-		expect(
-			deleteClientUseCase.execute({id: idClient})
-		).toBeTruthy()
+		expect(mockClientRepository.exists).toBeCalled()
+		expect(mockClientRepository.delete).toBeCalled()
+		expect(deleteResult).toBe(true)
+
 	})
 
 	it('should fail by informing a wrong id', async () => {
+		const mockClientRepository = {
+			exists: jest.fn().mockReturnValue(Promise.resolve(false))
+		}
+
+		//@ts-expect-error defined part of the methods
+		const deleteClientUseCase = new DeleteClientUseCase(mockClientRepository)
+
 		const wrongId = 'wrong-id'
 
 		await expect(
 			deleteClientUseCase.execute({id: wrongId})
 		).rejects.toBeInstanceOf(AppError)
+		expect(mockClientRepository.exists).toBeCalled()
 
 	})
 })

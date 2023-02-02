@@ -1,52 +1,41 @@
 import 'reflect-metadata'
-import {IClientsRepository} from "@modules/client/domain/repositories/IClientsRepository";
-import {MockClientsRepository} from "@modules/client/domain/repositories/mocks/MockClientsRepository";
 import {ShowAllClientsUseCase} from "..";
-import {CreateClientUseCase} from "../../CreateClient";
 import {IClient} from '@modules/client/domain/models/IClient';
+import {v4 as uuid} from 'uuid'
 
-let mockClientsRepository: IClientsRepository
 let showAllClientsUseCase: ShowAllClientsUseCase
-let createClientUseCase: CreateClientUseCase
+let expectedOutputListClients: IClient[]
+let mockClientRepository: any //defining only method create
 
 describe('ShowAllClients', () => {
 
 	beforeAll(() => {
-		mockClientsRepository = new MockClientsRepository()
-		showAllClientsUseCase = new ShowAllClientsUseCase(mockClientsRepository)
-		createClientUseCase = new CreateClientUseCase(mockClientsRepository)
+		const clientId = uuid()
+		expectedOutputListClients = [{
+			id: clientId,
+			name: 'test-name',
+			age: 18,
+			phoneNumber: 'test-number',
+			address: {
+				id: uuid(),
+				city: 'test-city',
+				streetAndNumber: 'test-address',
+				district: 'test-district',
+				clientId
+			}
+		}]
+		mockClientRepository = {
+			findAll: jest.fn().mockReturnValue(Promise.resolve(expectedOutputListClients))
+		}
+
+		showAllClientsUseCase = new ShowAllClientsUseCase(mockClientRepository)
 	})
 
 	it('should show all registerd clients', async () => {
-		const client = {
-			name: "tomaz xavier",
-			age: 18,
-			phoneNumber: "49998123812",
-			city: 'Florianópolis',
-			streetAndNumber: 'Rua da alvorada, 134',
-			district: 'Centro',
-			budget: 'R$139,00',
-			budgetDescription: 'limpeza dental',
-			anamnese: 'Doença cardiovascular'
-		}
-
-		const client_2 = {
-			name: "joão",
-			age: 24,
-			phoneNumber: "499982939212",
-			city: 'São Paulo',
-			streetAndNumber: 'Rua da alvorada, 134',
-			district: 'Centro',
-			budget: 'R$139,00',
-			budgetDescription: 'limpeza dental',
-			anamnese: 'Doença cardiovascular'
-		}
-
-		await createClientUseCase.execute(client)
-		await createClientUseCase.execute(client_2)
 
 		const clients = await showAllClientsUseCase.execute()
 
-		expect(clients satisfies IClient[]).toBeTruthy()
+		expect(mockClientRepository.findAll).toBeCalled()
+		expect(clients).toStrictEqual(expectedOutputListClients)
 	})
 })

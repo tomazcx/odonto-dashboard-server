@@ -1,30 +1,50 @@
 import 'reflect-metadata'
-import {IClientsRepository} from "@modules/client/domain/repositories/IClientsRepository"
-import {MockClientsRepository} from "@modules/client/domain/repositories/mocks/MockClientsRepository"
 import {CreateClientUseCase} from ".."
+import {v4 as uuid} from 'uuid'
+import {IClient} from '@modules/client/domain/models/IClient'
 
-let mockClientsRepository: IClientsRepository
 let createClientUseCase: CreateClientUseCase
+let expectedOutputClient: IClient
+let mockClientRepository: any //defining only method create
 
 describe("CreateClient", () => {
 
 	beforeAll(() => {
-		mockClientsRepository = new MockClientsRepository()
-		createClientUseCase = new CreateClientUseCase(mockClientsRepository)
+		const clientId = uuid()
+		expectedOutputClient = {
+			id: clientId,
+			name: 'test-name',
+			age: 18,
+			phoneNumber: 'test-number',
+			address: {
+				id: uuid(),
+				city: 'test-city',
+				streetAndNumber: 'test-address',
+				district: 'test-district',
+				clientId
+			}
+		}
+		mockClientRepository = {
+			create: jest.fn().mockReturnValue(Promise.resolve(expectedOutputClient))
+		}
+
+		createClientUseCase = new CreateClientUseCase(mockClientRepository)
 	})
 
 	it('should create a new client', async () => {
-		const client = {
-			name: "tomaz xavier",
+
+		const createClientDto = {
+			name: 'test-name',
 			age: 18,
-			phoneNumber: "49998123812",
-			city: 'Florianópolis',
-			streetAndNumber: 'Rua da alvorada, 134',
-			district: 'Centro'
+			phoneNumber: 'test-number',
+			city: 'test-city',
+			streetAndNumber: 'test-address',
+			district: 'test-district'
 		}
 
-		const registeredClient = await createClientUseCase.execute(client)
+		const registeredClient = await createClientUseCase.execute(createClientDto)
 
-		expect(registeredClient).toHaveProperty('id')
+		expect(mockClientRepository.create).toBeCalled()
+		expect(registeredClient).toStrictEqual(expectedOutputClient)
 	})
 })

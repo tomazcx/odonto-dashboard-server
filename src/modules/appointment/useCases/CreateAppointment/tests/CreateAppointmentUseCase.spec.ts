@@ -1,60 +1,67 @@
-import {IAppointmentsRepository} from "@modules/appointment/domain/repositories/IAppointmentsRepository"
-import {MockAppointmentsRepository} from "@modules/appointment/domain/repositories/mocks/MockAppointmentsRepository"
-import {IClientsRepository} from "@modules/client/domain/repositories/IClientsRepository"
-import {MockClientsRepository} from "@modules/client/domain/repositories/mocks/MockClientsRepository"
-import {CreateClientUseCase} from "@modules/client/useCases/CreateClient"
-import {AppError} from "@shared/errors/AppError"
-import {CreateAppointmentUseCase} from ".."
-
-let mockClientsRepository: IClientsRepository
-let mockAppointmentsRepository: IAppointmentsRepository
-let createClientUseCase: CreateClientUseCase
-let createAppointmentUseCase: CreateAppointmentUseCase
+import 'reflect-metadata'
+import {IAppointment} from '@modules/appointment/domain/models/IAppointment'
+import {AppError} from '@shared/errors/AppError'
+import {v4 as uuid} from 'uuid'
+import {CreateAppointmentUseCase} from '..'
+import {CreateAppointmentDTO} from '../domain/CreateAppointmentDTO'
 
 describe('CreateAppointment', () => {
+	let clientId: string
+	let id: string
+	let expectedAppointmentOutput: IAppointment
+	let createAppoitnmentDTO: CreateAppointmentDTO
+	let mockAppointmentsRepository: any //defined part of methods
 
-	beforeAll(() => {
-		mockClientsRepository = new MockClientsRepository()
-		mockAppointmentsRepository = new MockAppointmentsRepository()
-		createClientUseCase = new CreateClientUseCase(mockClientsRepository)
-		createAppointmentUseCase = new CreateAppointmentUseCase(mockAppointmentsRepository, mockClientsRepository)
+	beforeEach(() => {
+		clientId = uuid()
+		id = uuid()
+
+		expectedAppointmentOutput = {
+			id,
+			date: 'test-date',
+			teeth: 'test-teeth',
+			proccedure: 'test-proccedure',
+			clientId: clientId
+		}
+
+		mockAppointmentsRepository = {
+			create: jest.fn().mockReturnValue(Promise.resolve(expectedAppointmentOutput))
+		}
+
+		createAppoitnmentDTO = {
+			date: 'test-date',
+			teeth: 'test-teeth',
+			proccedure: 'test-proccedure',
+			clientId: clientId
+
+		}
 	})
 
 	it('should create a new appointment', async () => {
 
-		const client = {
-			name: "tomaz xavier",
-			age: 18,
-			phoneNumber: "49998123812",
-			city: 'Florianópolis',
-			streetAndNumber: 'Rua da alvorada, 134',
-			district: 'Centro'
+		const mockClientsRepository = {
+			exists: jest.fn().mockReturnValue(Promise.resolve(true))
 		}
 
-		const {id} = await createClientUseCase.execute(client)
+		//@ts-expect-error defined part of methods
+		const createAppointmentUseCase = new CreateAppointmentUseCase(mockAppointmentsRepository, mockClientsRepository)
 
-		const appointment = {
-			date: '01/01/2000',
-			teeth: 'test-teeth',
-			proccedure: 'test-proccedure',
-			clientId: id
-		}
+		const createdAppointment = await createAppointmentUseCase.execute(createAppoitnmentDTO)
 
-		const createdAppointment = await createAppointmentUseCase.execute(appointment)
-
-		expect(createdAppointment).toHaveProperty('id')
+		expect(mockClientsRepository.exists).toBeCalled()
+		expect(mockAppointmentsRepository.create).toBeCalled()
+		expect(createdAppointment).toStrictEqual(expectedAppointmentOutput)
 	})
 
 	it('shoudl fail due to invalid client id', async () => {
-		const appointment = {
-			date: '01/01/2000',
-			teeth: 'test-teeth',
-			proccedure: 'test-proccedure',
-			clientId: 'invalid-id'
+		const mockClientsRepository = {
+			exists: jest.fn().mockReturnValue(Promise.resolve(false))
 		}
+		//@ts-expect-error defined part of methods
+		const createAppointmentUseCase = new CreateAppointmentUseCase(mockAppointmentsRepository, mockClientsRepository)
 
 		await expect(
-			createAppointmentUseCase.execute(appointment)
+			createAppointmentUseCase.execute(createAppoitnmentDTO)
 		).rejects.toBeInstanceOf(AppError)
 
 	})

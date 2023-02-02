@@ -1,62 +1,79 @@
-import {IClientsRepository} from "@modules/client/domain/repositories/IClientsRepository";
-import {MockClientsRepository} from "@modules/client/domain/repositories/mocks/MockClientsRepository";
 import {AppError} from "@shared/errors/AppError";
 import {UpdateClientUseCase} from "..";
-import {CreateClientUseCase} from "../../CreateClient";
-
-let mockClientsRepository: IClientsRepository
-let updateClientUseCase: UpdateClientUseCase
-let createClientUseCase: CreateClientUseCase
+import {v4 as uuid} from 'uuid'
 
 describe('UpdateClient', () => {
-
-	beforeAll(() => {
-		mockClientsRepository = new MockClientsRepository()
-		updateClientUseCase = new UpdateClientUseCase(mockClientsRepository)
-		createClientUseCase = new CreateClientUseCase(mockClientsRepository)
-	})
+	const clientId = uuid()
+	const addressId = uuid()
 
 	it('should be able to update the data from a registerd client', async () => {
-		const client = {
-			name: "tomaz xavier",
+		const expectedOutputClient = {
+			id: clientId,
+			name: 'test-name',
 			age: 18,
-			phoneNumber: "49998123812",
-			city: 'Florianópolis',
-			streetAndNumber: 'Rua da alvorada, 134',
-			district: 'Centro',
-			budget: 'R$139,00',
-			budgetDescription: 'limpeza dental',
-			anamnese: 'Doença cardiovascular'
+			phoneNumber: 'test-number',
+			address: {
+				id: addressId,
+				city: 'test-city',
+				streetAndNumber: 'test-address',
+				district: 'test-district',
+				clientId
+			}
+		}
+		const mockClientsRepository = {
+			exists: jest.fn().mockReturnValue(Promise.resolve(true)),
+			update: jest.fn().mockReturnValue(Promise.resolve(expectedOutputClient))
 		}
 
-		const registeredClient = await createClientUseCase.execute(client)
+		//@ts-expect-error define part of methods
+		const updateClientUseCase = new UpdateClientUseCase(mockClientsRepository)
 
-		const clientId = registeredClient.id
-		registeredClient.name = 'tomaz cantarelli xavier'
+		const updateClientDTO = {
+			id: clientId,
+			name: 'test-name',
+			age: 18,
+			phoneNumber: 'test-number',
+			address: {
+				id: addressId,
+				city: 'test-city',
+				clientId
+			}
+		}
 
-		const updatedClient = await updateClientUseCase.execute({id: clientId, clientData: registeredClient})
+		const updatedClient = await updateClientUseCase.execute({id: clientId, clientData: updateClientDTO})
 
-		expect(updatedClient.name).toEqual('tomaz cantarelli xavier')
+		expect(mockClientsRepository.exists).toBeCalled()
+		expect(mockClientsRepository.update).toBeCalled()
+		expect(updatedClient).toStrictEqual(expectedOutputClient)
+
 	})
 
-	it('should fail because of wrong id', async () => {
-		const client = {
-			name: "tomaz xavier",
+	it('should fail by informing a wrong id', async () => {
+		const updateClientDTO = {
+			id: clientId,
+			name: 'test-name',
 			age: 18,
-			phoneNumber: "49998123812",
-			city: 'Florianópolis',
-			streetAndNumber: 'Rua da alvorada, 134',
-			district: 'Centro'
+			phoneNumber: 'test-number',
+			address: {
+				id: addressId,
+				city: 'test-city',
+				clientId
+			}
 		}
 
-		const registeredClient = await createClientUseCase.execute(client)
+		const mockClientRepository = {
+			exists: jest.fn().mockReturnValue(Promise.resolve(false))
+		}
 
-		const clientId = 'id-falso'
-		registeredClient.name = 'tomaz cantarelli xavier'
+		//@ts-expect-error defined part of the methods
+		const updateClientUseCase = new UpdateClientUseCase(mockClientRepository)
+
+		const wrongId = 'wrong-id'
 
 		await expect(
-			updateClientUseCase.execute({id: clientId, clientData: registeredClient})
+			updateClientUseCase.execute({id: wrongId, clientData: updateClientDTO})
 		).rejects.toBeInstanceOf(AppError)
+		expect(mockClientRepository.exists).toBeCalled()
 
 	})
 
